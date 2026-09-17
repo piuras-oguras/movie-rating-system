@@ -80,7 +80,7 @@ public class RegisterView extends VerticalLayout {
 
         try {
             User user = userService.register(username.trim(), password);
-            MainLayout.setCurrentUserName(user.getUsername());
+            MainLayout.setCurrentUser(user);
             Notification.show("Konto utworzone. Witaj, " + user.getUsername() + "!", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             UI.getCurrent().navigate(HomePage.class);

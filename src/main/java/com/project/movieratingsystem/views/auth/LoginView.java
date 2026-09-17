@@ -51,7 +51,7 @@ public class LoginView extends VerticalLayout {
     private void attemptLogin(String username, String password) {
         Optional<User> user = userService.authenticate(username, password);
         if (user.isPresent()) {
-            MainLayout.setCurrentUserName(user.get().getUsername());
+            MainLayout.setCurrentUser(user.get());
             Notification.show("Zalogowano jako: " + user.get().getUsername(), 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             UI.getCurrent().navigate(HomePage.class);

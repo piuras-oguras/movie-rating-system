@@ -3,6 +3,7 @@ package com.project.movieratingsystem.views.reviews;
 import com.project.movieratingsystem.model.Rating;
 import com.project.movieratingsystem.services.RatingService;
 import com.project.movieratingsystem.views.MainLayout;
+import com.project.movieratingsystem.views.homepage.HomePage;
 import com.project.movieratingsystem.views.util.ConfirmationDialogs;
 import com.project.movieratingsystem.views.util.RatingFormatter;
 import com.vaadin.flow.component.button.Button;
@@ -21,14 +22,16 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import java.util.List;
 
-@PageTitle("Moje recenzje")
+@PageTitle("Zarządzanie recenzjami")
 @Route(value = "reviews", layout = MainLayout.class)
-public class ReviewsView extends VerticalLayout {
+public class ReviewsView extends VerticalLayout implements BeforeEnterObserver {
     private final RatingService ratingService;
     private Grid<Rating> reviewGrid;
     private String currentUserName;
@@ -92,6 +95,15 @@ public class ReviewsView extends VerticalLayout {
         setSizeFull();
 
         updateReviewList();
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (!MainLayout.isCurrentUserAdmin()) {
+            Notification.show("Brak uprawnień. Tylko administrator może zarządzać recenzjami.", 4000, Notification.Position.MIDDLE)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            event.forwardTo(HomePage.class);
+        }
     }
 
     private void updateReviewList() {

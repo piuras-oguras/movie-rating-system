@@ -3,6 +3,8 @@ package com.project.movieratingsystem.config;
 import com.project.movieratingsystem.model.Genre;
 import com.project.movieratingsystem.model.Movie;
 import com.project.movieratingsystem.services.MovieService;
+import com.project.movieratingsystem.services.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -10,13 +12,24 @@ import org.springframework.stereotype.Component;
 public class DataLoader implements CommandLineRunner {
 
     private final MovieService movieService;
+    private final UserService userService;
+    private final String adminUsername;
+    private final String adminPasswordHash;
 
-    public DataLoader(MovieService movieService) {
+    public DataLoader(MovieService movieService,
+                       UserService userService,
+                       @Value("${app.admin.username}") String adminUsername,
+                       @Value("${app.admin.password-hash}") String adminPasswordHash) {
         this.movieService = movieService;
+        this.userService = userService;
+        this.adminUsername = adminUsername;
+        this.adminPasswordHash = adminPasswordHash;
     }
 
     @Override
     public void run(String... args) {
+        userService.ensureAdminAccount(adminUsername, adminPasswordHash);
+
         if (movieService.findMovies("", null, null, null, null).isEmpty()) {
             Movie m1 = new Movie();
             m1.setTitle("The Matrix");

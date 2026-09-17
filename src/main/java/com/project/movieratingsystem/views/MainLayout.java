@@ -1,5 +1,7 @@
 package com.project.movieratingsystem.views;
 
+import com.project.movieratingsystem.model.Role;
+import com.project.movieratingsystem.model.User;
 import com.project.movieratingsystem.views.moviemanagement.MovieManagementView;
 import com.project.movieratingsystem.views.auth.LoginView;
 import com.project.movieratingsystem.views.auth.RegisterView;
@@ -30,11 +32,14 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 public class MainLayout extends AppLayout {
 
     private static final String SESSION_USERNAME_ATTRIBUTE = "userName";
+    private static final String SESSION_ROLE_ATTRIBUTE = "userRole";
 
     private Span userStatusLabel;
     private Button loginButton;
     private Button registerButton;
     private Button logoutButton;
+    private SideNavItem reviewsNavItem;
+    private SideNavItem movieManagementNavItem;
 
     public MainLayout() {
         addToNavbar(createHeaderContent());
@@ -62,8 +67,12 @@ public class MainLayout extends AppLayout {
         mainNav.setLabel("Menu");
         mainNav.addItem(new SideNavItem("Strona główna", HomePage.class, VaadinIcon.HOME_O.create()));
         mainNav.addItem(new SideNavItem("Zasugeruj film", SuggestedMovieView.class, VaadinIcon.FILM.create()));
-        mainNav.addItem(new SideNavItem("Recenzje", ReviewsView.class, VaadinIcon.FILE_O.create()));
-        mainNav.addItem(new SideNavItem("Zarządzanie filmami", MovieManagementView.class, VaadinIcon.EDIT.create()));
+
+        reviewsNavItem = new SideNavItem("Recenzje", ReviewsView.class, VaadinIcon.FILE_O.create());
+        mainNav.addItem(reviewsNavItem);
+
+        movieManagementNavItem = new SideNavItem("Zarządzanie filmami", MovieManagementView.class, VaadinIcon.EDIT.create());
+        mainNav.addItem(movieManagementNavItem);
 
         userStatusLabel = new Span();
         userStatusLabel.addClassNames(LumoUtility.FontWeight.SEMIBOLD);
@@ -108,16 +117,19 @@ public class MainLayout extends AppLayout {
         }
         String currentUserName = getCurrentUserName();
         boolean loggedIn = currentUserName != null;
+        boolean isAdmin = isCurrentUserAdmin();
 
         userStatusLabel.setText(loggedIn ? "Zalogowano jako: " + currentUserName : "");
         userStatusLabel.setVisible(loggedIn);
         loginButton.setVisible(!loggedIn);
         registerButton.setVisible(!loggedIn);
         logoutButton.setVisible(loggedIn);
+        reviewsNavItem.setVisible(isAdmin);
+        movieManagementNavItem.setVisible(isAdmin);
     }
 
     private void logout() {
-        setCurrentUserName(null);
+        clearCurrentUser();
         updateAuthSection();
         Notification.show("Wylogowano", 3000, Notification.Position.TOP_CENTER);
         UI.getCurrent().navigate(HomePage.class);
@@ -128,10 +140,28 @@ public class MainLayout extends AppLayout {
         return session != null ? (String) session.getAttribute(SESSION_USERNAME_ATTRIBUTE) : null;
     }
 
-    public static void setCurrentUserName(String userName) {
+    public static Role getCurrentUserRole() {
+        VaadinSession session = VaadinSession.getCurrent();
+        return session != null ? (Role) session.getAttribute(SESSION_ROLE_ATTRIBUTE) : null;
+    }
+
+    public static boolean isCurrentUserAdmin() {
+        return getCurrentUserRole() == Role.ADMIN;
+    }
+
+    public static void setCurrentUser(User user) {
         VaadinSession session = VaadinSession.getCurrent();
         if (session != null) {
-            session.setAttribute(SESSION_USERNAME_ATTRIBUTE, userName);
+            session.setAttribute(SESSION_USERNAME_ATTRIBUTE, user.getUsername());
+            session.setAttribute(SESSION_ROLE_ATTRIBUTE, user.getRole());
+        }
+    }
+
+    public static void clearCurrentUser() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session != null) {
+            session.setAttribute(SESSION_USERNAME_ATTRIBUTE, null);
+            session.setAttribute(SESSION_ROLE_ATTRIBUTE, null);
         }
     }
 }

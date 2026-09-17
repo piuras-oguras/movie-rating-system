@@ -4,6 +4,7 @@ import com.project.movieratingsystem.model.Genre;
 import com.project.movieratingsystem.model.Movie;
 import com.project.movieratingsystem.services.MovieService;
 import com.project.movieratingsystem.views.MainLayout;
+import com.project.movieratingsystem.views.homepage.HomePage;
 import com.project.movieratingsystem.views.util.ConfirmationDialogs;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -23,6 +24,8 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -30,7 +33,7 @@ import java.util.List;
 
 @PageTitle("Zarządzanie filmami")
 @Route(value = "movie-management", layout = MainLayout.class)
-public class MovieManagementView extends VerticalLayout {
+public class MovieManagementView extends VerticalLayout implements BeforeEnterObserver {
 
     private final MovieService movieService;
     private Grid<Movie> movieGrid;
@@ -84,6 +87,15 @@ public class MovieManagementView extends VerticalLayout {
         setSizeFull();
 
         updateMovieList();
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (!MainLayout.isCurrentUserAdmin()) {
+            Notification.show("Brak uprawnień. Tylko administrator może zarządzać filmami.", 4000, Notification.Position.MIDDLE)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            event.forwardTo(HomePage.class);
+        }
     }
 
     private void updateMovieList() {
