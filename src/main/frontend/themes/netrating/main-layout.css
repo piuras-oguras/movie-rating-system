@@ -1,0 +1,77 @@
+header nav a:any-link {
+  text-decoration: none;
+  padding: 0 var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-m);
+  outline: 0;
+}
+
+header nav a:hover {
+  color: var(--lumo-header-text-color);
+}
+
+header nav a:active {
+  background-color: var(--lumo-contrast-5pct);
+}
+
+header nav a:focus-visible {
+  box-shadow: 0 0 0 2px var(--lumo-primary-color-50pct);
+}
+
+header nav a[highlight] vaadin-icon {
+  color: var(--lumo-primary-text-color);
+}
+
+header nav a[highlight] {
+  background-color: var(--lumo-primary-color-10pct);
+}
+
+
+/* Styl dla całej szuflady (menu) */
+[slot="drawer"] {
+  background-color: #ffffff !important;
+  padding: 0 !important; /* Usuwamy domyślny padding */
+  border: none !important;
+}
+
+/* Upewnij się, że kontener menu wypełnia całą wysokość */
+.menu-content {
+  height: 100%;
+}
+
+/* Style dla nawigacji SideNav */
+[slot="drawer"] vaadin-side-nav {
+  width: 100%;
+  padding: 0.5rem 0;
+}
+
+/* Style dla poszczególnych linków w menu */
+[slot="drawer"] vaadin-side-nav-item a {
+  color: #E0E0E0;
+  margin: 0.2rem 0.5rem;
+  padding-left: 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Styl linku po najechaniu myszką */
+[slot="drawer"] vaadin-side-nav-item:not([active]) a:hover {
+  background-color: #ffffff;
+}
+
+/* Styl dla aktywnego (wybranego) linku */
+[slot="drawer"] vaadin-side-nav-item[active] a {
+  background-color: #3B5B9A;
+  color: white;
+}
+
+/* Styl dla stopki z profilem */
+.menu-footer {
+  border-top: 1px solid #444; /* Linia oddzielająca */
+  background-color: #ffffff;
+}
+
+/* Styl przycisku wylogowania */
+.menu-footer vaadin-button {
+  color: #E0E0E0;
+  margin-top: 0.5rem;
+}
