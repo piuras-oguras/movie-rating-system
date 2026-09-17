@@ -4,12 +4,10 @@ import com.project.movieratingsystem.model.Genre;
 import com.project.movieratingsystem.model.Movie;
 import com.project.movieratingsystem.model.RatingStar;
 import com.project.movieratingsystem.repository.MovieRepository;
-import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,27 +22,16 @@ public class MovieService {
     }
 
     public List<Movie> findMovies(String title, String director, Genre genre, RatingStar ratingStarMax, RatingStar ratingStarMin) {
-        Specification<Movie> spec = (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
+        Specification<Movie> spec = byGenreAndRatingRange(genre, ratingStarMin, ratingStarMax);
 
-            if (title != null && !title.isEmpty()) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
-            }
-            if (director != null) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("director")), "%" + director.toLowerCase() + "%"));
-            }
-            if (genre != null) {
-                predicates.add(criteriaBuilder.equal(root.get("genre"), genre));
-            }
-
-            if (ratingStarMin != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("rating"), ratingStarMin.getStarValue()));
-            }
-            if (ratingStarMax != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("rating"), ratingStarMax.getStarValue()));
-            }
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        };
+        if (title != null && !title.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
+        }
+        if (director != null && !director.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("director")), "%" + director.toLowerCase() + "%"));
+        }
 
         return movieRepository.findAll(spec);
     }
@@ -85,22 +72,20 @@ public class MovieService {
     }
 
     private Specification<Movie> byGenreAndRatingRange(Genre genre, RatingStar minRating, RatingStar maxRating) {
-        return (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
+        Specification<Movie> spec = Specification.where(null);
 
-            if (genre != null) {
-                predicates.add(criteriaBuilder.equal(root.get("genre"), genre));
-            }
+        if (genre != null) {
+            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("genre"), genre));
+        }
+        if (minRating != null) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.greaterThanOrEqualTo(root.get("rating"), minRating.getStarValue()));
+        }
+        if (maxRating != null) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.lessThanOrEqualTo(root.get("rating"), maxRating.getStarValue()));
+        }
 
-            if (minRating != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("rating"), minRating.getStarValue()));
-            }
-
-            if (maxRating != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("rating"), maxRating.getStarValue()));
-            }
-
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        };
+        return spec;
     }
 }
